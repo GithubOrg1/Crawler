@@ -1,5 +1,3 @@
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +31,7 @@ public class Parser {
 		    emailStr = matcher2.group(0);
 		}
 		String directionStr = doc.getElementById("twocol").getElementsByTag("ul").get(0).text();
-		String profileStr = doc.getElementById("content").getElementsByTag("p").get(0).text();
+		String profileStr = doc.getElementById("content").getElementsByClass("titles").text();
 		
 		if(n<10){
 	    	name[n]=nameStr;
@@ -47,13 +45,6 @@ public class Parser {
 	
 	public Object[] getArray()
 	{
-		for(int i=0;i<message.length;i++){
-        	String[] array = (String[]) message[i];
-        	for(int j=0;j<10;j++){
-        		System.out.print(array[j]);
-        	}
-        	System.out.println();
-		}
 		return message;
 	}
 }
