@@ -14,14 +14,16 @@ import org.jsoup.select.Elements;
 
 public class Spider {
 	
-	  private static final int MAX_PAGES_TO_SEARCH = 10;
+	  private final int MAX_PAGES_TO_SEARCH = 10;
 	  private static List<String> links = new LinkedList<String>();
-	  private static String[] name=new  String[10];
+	  Parser parser = new Parser();
+	  public static Object[] message;
+	  /*private static String[] name=new  String[10];
 	  private static String[] profile=new String[10];
 	  private static String[] tel=new String[10];
 	  private static String[] email=new String[10];
 	  private static String[] direction=new String[10];
-	  private static int n=0;
+	  private static int n=0;*/
 
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
 		// TODO Auto-generated method stub
@@ -29,7 +31,8 @@ public class Spider {
 		spider.getLinks();
 		spider.runSingleThread();
 		spider.runMultiThread();
-		spider.DBconnection();
+		DBconnection connect = new DBconnection();
+		connect.connectdb("insert into teacherlist(tel,e_mail,profile,name,direction) values(?,?,?,?,?)",message);
 	}
 	
 	public void runSingleThread()
@@ -42,7 +45,8 @@ public class Spider {
 				Document doc1 = Jsoup.connect(links.get(index)).timeout(30000).get();
 				//String string = doc1.body().getAllElements().get(0).html().replaceAll("&nbsp;", "");
 				//doc1 = Jsoup.parse(string);
-				parse(doc1);
+				parser.parse(doc1);
+				message=parser.getArray();
 			}
 			catch(IOException e)
 	        {
@@ -89,7 +93,8 @@ public class Spider {
 				Document doc = Jsoup.connect(url).timeout(30000).get();
 				//String string = doc.body().getAllElements().get(0).html().replaceAll("&nbsp;", "");
 				//doc = Jsoup.parse(string);
-				parse(doc);
+				parser.parse(doc);
+				message=parser.getArray();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -133,66 +138,6 @@ public class Spider {
 			e.printStackTrace();
         }
 	}
-	
-	public void parse(Document doc)
-	{
-		String telStr = null;
-		String emailStr = null;
-		String nameStr = doc.getElementsByTag("h2").text();
-		String contactinfo = doc.getElementById("contactinfo").getElementsByTag("p").get(0).text();
-		Pattern p_tel = Pattern.compile("\\+((\\-)?[\\d]+)+");
-		Matcher matcher1 = p_tel.matcher(contactinfo);
-		Pattern p_email = Pattern.compile("[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?");
-		Matcher matcher2 = p_email.matcher(contactinfo);
-		if (matcher1.find()) {
-		    telStr = matcher1.group(0);
-		}
-		if (matcher2.find()) {
-		    emailStr = matcher2.group(0);
-		}
-		String directionStr = doc.getElementById("twocol").getElementsByTag("ul").get(0).text();
-		String profileStr = doc.getElementById("content").getElementsByTag("p").get(0).text();
-		
-		if(n<=9){
-	    	name[n]=nameStr;
-	    	profile[n]=profileStr;
-	    	tel[n]=telStr;
-	    	email[n]=emailStr;
-	    	direction[n]=directionStr;
-	    	n++;
-		}
-	}
-	
-	public void DBconnection() throws SQLException, ClassNotFoundException
-	{
-		 //Connection conn = null;
-
-	        String sql;
-	       // String url = "jdbc:mysql://127.0.0.1:3306/my_homepage"
-	                //+ "user=root&password=179324865";
-	        Connection conn = null;
-	        try {
-	        	Class.forName("com.mysql.jdbc.Driver");
-	            System.out.println("成功加载MySQL驱动程序");
-	            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/my_homepage","root","179324865");
-	            sql = "insert into teacherlist(tel,e_mail,profile,name,direction) values(?,?,?,?,?)";
-	            PreparedStatement st = conn.prepareStatement(sql);
-	            for(int i=0;i<9;i++){
-	       		 st.setString(1, tel[i]);
-	       		 st.setString(2, email[i]);
-	       		 st.setString(3, profile[i]);
-	       		 st.setString(4, name[i]);
-	       		 st.setString(5, direction[i]);
-	       		 st.executeUpdate();
-	            }
-	            st.executeUpdate();
-	            conn.close();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        } /*catch (Exception e) {
-	            e.printStackTrace();
-	        } finally {
-	            conn.close();
-	        }*/
-	}
 }
+
+
